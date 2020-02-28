@@ -3,6 +3,7 @@ let randomCountryElement = document.querySelector('#random-country')
 let userAnswerElement = document.querySelector("#user-answer")
 let submitButton = document.querySelector("#submit-answer")
 let resultTextElement = document.querySelector('#result')
+let replayButton = document.querySelector('#replay')
 
 // TODO finish the script to challenge the user about their knowledge of capital cities.
 // An array of country codes is provided in the countries.js file. 
@@ -15,36 +16,43 @@ console.log(countriesAndCodes)  // You don't need to log countriesAndCodes - jus
 // TODO display the country's name in the randomCountryElement
 
 // Block to show a random country
-let index = Math.floor(Math.random()*countriesAndCodes.length)
-let country =  countriesAndCodes[index].name
-randomCountryElement.innerHTML = country
+newCountry()
 
-// When submit button is clicked
-submitButton.addEventListener('click', function () {
-    let answer = userAnswerElement.value
+function newCountry () {
+    let index = Math.floor(Math.random()*countriesAndCodes.length)
+    let country =  countriesAndCodes[index].name
+    randomCountryElement.innerHTML = country
+
+    // When submit button is clicked
+    submitButton.addEventListener('click', function () {
+        let answer = userAnswerElement.value
+        // Create url based on country code
+        let url = `http://api.worldbank.org/v2/country/${countriesAndCodes[index]['alpha-2']}?format=json`
+        // Get the data for the country in question
+        fetch(url)
+            .then( res => res.json() )
+            .then( countryData => {
+                // Locate capital city in json data, compare it to user answer and display message
+                let result = countryData[1][0].capitalCity
+                if (result.toLowerCase() === answer.toLowerCase()) {
+                    resultTextElement.innerHTML = `Yes! ${result} is correct.`
+                } else {
+                    resultTextElement.innerHTML = `Sorry, no. ${result} is the correct answer.`
+                }
+            })
+            .catch( err => {
+                console.log(err)
+            })
+    })
+}
+
+
+replayButton.addEventListener('click', function () {
     userAnswerElement.value = ''            // clear answer
-    // Create url based on country code
-    let url = `http://api.worldbank.org/v2/country/${countriesAndCodes[index]['alpha-2']}?format=json`
-    // Get the data for the country in question
-    fetch(url)
-        .then( res => res.json() )
-        .then( countryData => {
-            // Locate capital city in json data, compare it to user answer and display message
-            let result = countryData[1][0].capitalCity
-            if (result.toLowerCase() === answer.toLowerCase()) {
-                resultTextElement.innerHTML = `Yes! ${result} is correct.`
-            } else {
-                resultTextElement.innerHTML = `Sorry, no. ${result} is the correct answer.`
-            }
-        })
-        .catch( err => {
-            console.log(err)
-        })
-
+    resultTextElement.innerHTML = ''            // clear result
+    newCountry()
 
 })
-
-
 
 
 // TODO add a click event handler to the submitButton.  When the user clicks the button,
