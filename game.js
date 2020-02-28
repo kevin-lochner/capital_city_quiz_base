@@ -1,3 +1,4 @@
+
 let randomCountryElement = document.querySelector('#random-country')
 let userAnswerElement = document.querySelector("#user-answer")
 let submitButton = document.querySelector("#submit-answer")
@@ -8,12 +9,43 @@ let resultTextElement = document.querySelector('#result')
 // Your browser treats all JavaScript files as one big file, o
 // organized in the order of the script tags so the countriesAndCodes array is available to this script.
 
-console.log(countriesAndCodes)  // You don't need to log countriesAndCodes - just proving it is available 
-
+console.log(countriesAndCodes)  // You don't need to log countriesAndCodes - just proving it is available
 
 // TODO when the page loads, select an element at random from the countriesAndCodes array
+// TODO display the country's name in the randomCountryElement
 
-// TODO display the country's name in the randomCountryElement 
+// Block to show a random country
+let index = Math.floor(Math.random()*countriesAndCodes.length)
+let country =  countriesAndCodes[index].name
+randomCountryElement.innerHTML = country
+
+// When submit button is clicked
+submitButton.addEventListener('click', function () {
+    let answer = userAnswerElement.value
+    userAnswerElement.value = ''            // clear answer
+    // Create url based on country code
+    let url = `http://api.worldbank.org/v2/country/${countriesAndCodes[index]['alpha-2']}?format=json`
+    // Get the data for the country in question
+    fetch(url)
+        .then( res => res.json() )
+        .then( countryData => {
+            // Locate capital city in json data, compare it to user answer and display message
+            let result = countryData[1][0].capitalCity
+            if (result.toLowerCase() === answer.toLowerCase()) {
+                resultTextElement.innerHTML = `Yes! ${result} is correct.`
+            } else {
+                resultTextElement.innerHTML = `Sorry, no. ${result} is the correct answer.`
+            }
+        })
+        .catch( err => {
+            console.log(err)
+        })
+
+
+})
+
+
+
 
 // TODO add a click event handler to the submitButton.  When the user clicks the button,
 //  * read the text from the userAnswerElement 
